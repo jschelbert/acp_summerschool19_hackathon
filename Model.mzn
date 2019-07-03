@@ -25,5 +25,15 @@ array[WORKSHEETS] of int : DURATION;       %Duration of the worksheet == number 
 array[WORKSHEETS,DAYS] of int : USED_ROADS; %Road_ID that is closed of each day in DURATION, the remaining are filled with the DUmmy Road n_roads --> we have to find something better
 array[WORKSHEETS,DAYS] of int : WORKERS_NEEDED; %Number of workers that are needed of each day in DURATION, the remaining day are filled with 0 --> we have to find something better
 array[ROAD_SETS] of int : MAX_CLOSED;      %Maximal number of roads in each set that can be closed simultaneously
-array[ROAD_SETS] of set : ROAD_CLOSE;      %Set of roads which refer to MAX_CLOSED
-array[PRECEDE_SET] of tuple of int: PRECEDE;  %The first Workbook_ID has to be finished before the second 
+array[ROAD_SETS] of set of int: ROAD_CLOSE;      %Set of roads which refer to MAX_CLOSED
+array[PRECEDE_SET,0..1] of int : PRECEDE;  %The first Workbook_ID has to be finished before the second 
+
+
+%Variables
+array[WORKSHEETS] of var DAYS : start;
+array[WORKSHEETS] of var bool : used;
+
+%Earliest starting time
+
+   
+
