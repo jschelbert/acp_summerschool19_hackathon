@@ -1,35 +1,35 @@
 def read_data(filename):
     with open(filename) as f:
         mylist = f.read().splitlines()
-    
-    q= mylist[0].split()
-    nDays= int(q[0])
-    nRoads= int(q[1])
-    nWC= int(q[2])
+
+    q = mylist[0].split()
+    nDays = int(q[0])
+    nRoads = int(q[1])
+    nWC = int(q[2])
     nWS = int(q[3])
     nActivities = int(q[4])
-    line_num=1
+    line_num = 1
     ## Roads
-    roads= []
+    roads = []
     for i in range(nRoads):
         q = mylist[line_num].split()
         Road_id = int(q[0])
-        days= [0]*nDays
-        for k in range(len(q)-1):
-            a=q[k+1]
+        days = [0] * nDays
+        for k in range(len(q) - 1):
+            a = q[k + 1]
             b = a.split(":")
-            for j in range(int(b[0]),int(b[1])):
-                days[j]=int(b[2])
-        roads.append(Road(Road_id,days))
-        line_num+=1
+            for j in range(int(b[0]), int(b[1])):
+                days[j] = int(b[2])
+        roads.append(Road(Road_id, days))
+        line_num += 1
     ### Work Centers
     workcenters = []
     for i in range(nWC):
         q = mylist[line_num].split()
-        workcenters.append( Workcenter(int(q[0]),int(q[1])))
-        line_num+=1
+        workcenters.append(Workcenter(int(q[0]), int(q[1])))
+        line_num += 1
     ### worksheets
-    worksheets =[]
+    worksheets = []
     for i in range(nWS):
         q = mylist[line_num].split()
         worksheet_id = int(q[0])
@@ -39,36 +39,34 @@ def read_data(filename):
         est = int(q[4])
         lst = int(q[5])
         duration = int(q[6])
-        activities= []
+        activities = []
         for l in range(duration):
-            activities.append(Activity(rank=l,affected_road_id=int(q[7+2*l]),  workers_needed=int(8+2*l),
+            activities.append(Activity(rank=l, affected_road_id=int(q[7 + 2 * l]), workers_needed=int(8 + 2 * l),
                                        worksheet_id=worksheet_id))
-        worksheets.append(Worksheet(worksheet_id,importance,mandatory,workcenter_id,duration,est,lst,activities))
-        line_num+=1
-    lines_left = len(mylist)-line_num
-    roadblock_constraints=[]
-    precendence_relations =[]
-    while(lines_left>0):
+        worksheets.append(Worksheet(worksheet_id, importance, mandatory, workcenter_id, duration, est, lst, activities))
+        line_num += 1
+    lines_left = len(mylist) - line_num
+    roadblock_constraints = []
+    precendence_relations = []
+    while (lines_left > 0):
         q = mylist[line_num].split()
-        
-        
-        if q[0]=='M':
-            num_roads_blocked =int(q[1])
-            roads_blocked=[]
-            for i in range(len(q)-1):
-                roads_blocked.append(int(q[i+1]))
-            roadblock_constraints.append(RoadblockConstraint( max_number_allowed= num_roads_blocked, 
-                                affected_road_ids= roads_blocked))
-        if q[0]=='P':
+
+        if q[0] == 'M':
+            num_roads_blocked = int(q[1])
+            roads_blocked = []
+            for i in range(len(q) - 1):
+                roads_blocked.append(int(q[i + 1]))
+            roadblock_constraints.append(RoadblockConstraint(max_number_allowed=num_roads_blocked,
+                                                             affected_road_ids=roads_blocked))
+        if q[0] == 'P':
             predced = int(q[1])
             successor = int(q[2])
-            precendence_relations.append((predced,successor))
-        lines_left-=1
-        line_num+=1
-        
-  
-    
-    return nDays,worksheets,roads,workcenters,roadblock_constraints,precendence_relations
+            precendence_relations.append((predced, successor))
+        lines_left -= 1
+        line_num += 1
+
+    return nDays, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
+
 
 class Worksheet(object):
 
@@ -133,11 +131,11 @@ class RoadblockConstraint(object):
 class ProblemInstance(object):
 
     def __init__(self, filename, output_filename=None):
-
         self.filename = filename
         self.output_filename = output_filename if output_filename else filename + ".sol"
 
-        number_of_days, worksheets, roads, workcenters, roadblock_constraints, precedence_relations = read_data(filename)
+        number_of_days, worksheets, roads, workcenters, roadblock_constraints, precedence_relations = read_data(
+            filename)
         self.number_of_days = number_of_days
         self.worksheets = worksheets
         self.roads = roads
