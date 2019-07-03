@@ -41,7 +41,7 @@ def read_data(filename):
         duration = int(q[6])
         activities = []
         for l in range(duration):
-            activities.append(Activity(rank=l, affected_road_id=int(q[7 + 2 * l]), workers_needed=int(8 + 2 * l),
+            activities.append(Activity(rank=l, affected_road_id=int(q[7 + 2 * l]), workers_needed=int(q[8 + 2 * l]),
                                        worksheet_id=worksheet_id))
         worksheets.append(Worksheet(worksheet_id, importance, mandatory, workcenter_id, duration, est, lst, activities))
         line_num += 1
