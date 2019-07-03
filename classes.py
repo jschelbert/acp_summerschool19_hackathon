@@ -1,6 +1,6 @@
 class Worksheet(object):
 
-    def __init__(self, id, importance=0, mandatory=False, workcenter=None, duration=1,
+    def __init__(self, id, importance=0, mandatory=0, workcenter=None, duration=1,
                  earliest_start=None, latest_start=None, activities=[]):
         self.id = id
         self.importance = importance
@@ -17,15 +17,15 @@ class Worksheet(object):
 
 class Activity(object):
 
-    def __init__(self, worksheet, rank=None, workers_needed=None, affected_road_id=None, affected_road=None):
-        self.worksheet = worksheet
+    def __init__(self, worksheet_id, rank=None, workers_needed=None, affected_road_id=None, affected_road=None):
+        self.worksheet_id = worksheet_id
         self.rank = rank
         self.workers_needed = workers_needed
         self.affected_road_id = affected_road_id
         self.affected_road = affected_road
 
     def __str__(self):
-        return f"Activity within Worksheet ID {self.worksheet.id} with rank {self.rank}\nAffected road: ID {self.affected_road_id}\nWorkers needed: {self.workers_needed}"
+        return f"Activity within Worksheet ID {self.worksheet_id} with rank {self.rank}\nAffected road: ID {self.affected_road_id}\nWorkers needed: {self.workers_needed}"
 
 
 class Road(object):
@@ -46,6 +46,16 @@ class Workcenter(object):
 
     def __str__(self):
         return f"Workcenter(ID {self.id})\nNumber of workers available per day: {self.number_of_workers}"
+
+
+class RoadblockConstraint(object):
+    def __init__(self, max_number_allowed, affected_road_ids=None, affected_roads=None):
+        self.max_number_allowed = max_number_allowed
+        self.affected_road_ids = affected_road_ids
+        self.affected_roads = affected_roads
+
+    def __str__(self):
+        return f"There are maximal {self.max_number_allowed} roads allowed to be closed from {self.affected_road_ids}"
 
 
 class ProblemInstance(object):
