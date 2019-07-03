@@ -65,13 +65,13 @@ class ProblemInstance(object):
         self.filename = filename
         self.output_filename = output_filename if output_filename else filename + ".sol"
 
-        number_of_days, worksheets, roads, workcenters, roadblock_constraints, precendence_relations = read_data(filename)
+        number_of_days, worksheets, roads, workcenters, roadblock_constraints, precedence_relations = read_data(filename)
         self.number_of_days = number_of_days
         self.worksheets = worksheets
         self.roads = roads
         self.workcenters = workcenters
         self.roadblock_constraints = roadblock_constraints
-        self.precendence_relations = precendence_relations
+        self.precedence_relations = precedence_relations
 
     def __str__(self):
         return f"Problem instance read from {self.filename} - output in {self.output_filename}"
