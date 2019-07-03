@@ -65,7 +65,7 @@ def read_data(filename):
         lines_left -= 1
         line_num += 1
 
-    return nDays, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
+    return nDays,nActivities, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
 
 
 def write_data_file(filename, probleminstance):
