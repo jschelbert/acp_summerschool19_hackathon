@@ -80,7 +80,6 @@ n_road_sets = {len(probleminstance.roadblock_constraints)};
 n_precede = {len(probleminstance.precedence_relations)};""")
 
 
-
 class Worksheet(object):
 
     def __init__(self, id, importance=0, mandatory=0, workcenter=None, duration=1,
