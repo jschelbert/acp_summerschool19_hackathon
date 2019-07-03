@@ -68,6 +68,19 @@ def read_data(filename):
     return nDays, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
 
 
+def write_data_file(filename, probleminstance):
+    with open(filename, "w") as f:
+        f.write(f"""
+n_days = {probleminstance.number_of_days};
+n_roads = {len(probleminstance.roads)};      
+n_centers = {len(probleminstance.workcenters)};    
+n_worksheets = {len(probleminstance.worksheets)}; 
+n_activitys = {probleminstance.number_of_activities};  
+n_road_sets = {len(probleminstance.roadblock_constraints)};  
+n_precede = {len(probleminstance.precedence_relations)};""")
+
+
+
 class Worksheet(object):
 
     def __init__(self, id, importance=0, mandatory=0, workcenter=None, duration=1,
@@ -132,11 +145,12 @@ class ProblemInstance(object):
 
     def __init__(self, filename, output_filename=None):
         self.filename = filename
-        self.output_filename = output_filename if output_filename else filename + ".sol"
+        self.output_filename = output_filename if output_filename else filename + ".dzn"
 
-        number_of_days, worksheets, roads, workcenters, roadblock_constraints, precedence_relations = read_data(
+        number_of_days, number_of_activities, worksheets, roads, workcenters, roadblock_constraints, precedence_relations = read_data(
             filename)
         self.number_of_days = number_of_days
+        self.number_of_activities = number_of_activities
         self.worksheets = worksheets
         self.roads = roads
         self.workcenters = workcenters
