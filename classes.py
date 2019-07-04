@@ -8,6 +8,7 @@ def read_data(filename):
     nWC = int(q[2])
     nWS = int(q[3])
     nActivities = int(q[4])
+    activity_id = 0
     line_num = 1
     ## Roads
     roads = []
@@ -31,6 +32,7 @@ def read_data(filename):
     ### worksheets
     worksheets = []
     activity_rank = 0
+    all_activities = []
     for i in range(nWS):
         q = mylist[line_num].split()
         worksheet_id = int(q[0])
@@ -44,9 +46,11 @@ def read_data(filename):
 
         for l in range(duration):
             activity_rank += 1
-
-            activities.append(Activity(rank=activity_rank, affected_road_id=int(q[7 + 2 * l]),
-                                       workers_needed=int(q[8 + 2 * l]), worksheet_id=worksheet_id))
+            activity_id += 1
+            a = Activity(id=activity_id, rank=activity_rank, affected_road_id=int(q[7 + 2 * l]),
+                                       workers_needed=int(q[8 + 2 * l]), worksheet_id=worksheet_id)
+            all_activities.append(a)
+            activities.append(a)
         worksheets.append(Worksheet(worksheet_id, importance, mandatory, workcenter_id, duration, est, lst, activities))
         line_num += 1
     lines_left = len(mylist) - line_num
@@ -69,7 +73,7 @@ def read_data(filename):
         lines_left -= 1
         line_num += 1
 
-    return nDays, nActivities, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
+    return nDays, nActivities, worksheets, roads, workcenters, roadblock_constraints, precendence_relations, all_activities
 
 
 def print_perturbation(roads):
@@ -146,12 +150,13 @@ def print_maxclosed(roadblocks):
 
 def print_roadclosed(roadblocks):
     if len(roadblocks) > 0:
-        s = "[{"
+        s = "["
         for roadblock in roadblocks:
+            s += "{"
             for road in roadblock.affected_road_ids:
                 s = s + str(road) + ","
-            s = s + "}"
-        s = s[:-2] + "}]"
+            s = s + "}, "
+        s = s[:-2] + "]"
     else:
         s = "[]"
 
@@ -232,6 +237,17 @@ def print_w2a(worksheets, nActivities):
     return op
 
 
+def print_road_activities(probleminstance):
+    s = "["
+    for road in probleminstance.roads:
+        print(f"{road.id}")
+        s += "{"
+        s += f"{','.join([str(a.id) for a in probleminstance.activities if a.affected_road_id == road.id])}"
+        s += "},"
+    s = s[:-1] + "]"
+    return s
+
+
 def write_data_file(filename, probleminstance):
     with open(filename, "w") as f:
         f.write(f"""
@@ -257,6 +273,7 @@ W_TO_A = {print_w2a(probleminstance.worksheets, probleminstance.number_of_activi
 WORKERS_NEEDED = {print_workrsneeded(probleminstance.worksheets)};
 USED_ROADS = {print_useroads(probleminstance.worksheets)};
 ACTIVITY_CENTER = {print_activitycenter(probleminstance.worksheets)};
+ROAD_ACTIVITIES = {print_road_activities(probleminstance)};
 """)
 
 
@@ -279,7 +296,8 @@ class Worksheet(object):
 
 class Activity(object):
 
-    def __init__(self, worksheet_id, rank=None, workers_needed=None, affected_road_id=None, affected_road=None):
+    def __init__(self, id, worksheet_id, rank=None, workers_needed=None, affected_road_id=None, affected_road=None):
+        self.id = id
         self.worksheet_id = worksheet_id
         self.rank = rank
         self.workers_needed = workers_needed
@@ -326,7 +344,7 @@ class ProblemInstance(object):
         self.filename = filename
         self.output_filename = output_filename if output_filename else filename + ".dzn"
 
-        number_of_days, number_of_activities, worksheets, roads, workcenters, roadblock_constraints, precedence_relations = read_data(
+        number_of_days, number_of_activities, worksheets, roads, workcenters, roadblock_constraints, precedence_relations, activities = read_data(
             filename)
         self.number_of_days = number_of_days
         self.number_of_activities = number_of_activities
@@ -335,6 +353,7 @@ class ProblemInstance(object):
         self.workcenters = workcenters
         self.roadblock_constraints = roadblock_constraints
         self.precedence_relations = precedence_relations
+        self.activities = activities
 
     def __str__(self):
         return f"Problem instance read from {self.filename} - output in {self.output_filename}"
