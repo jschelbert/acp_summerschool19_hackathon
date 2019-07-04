@@ -68,16 +68,19 @@ constraint forall(w in WORKSHEETS) (
     
 % Precedence within a worksheet
 constraint forall(w in WORKSHEETS) (
-  forall(a, b in ACTIVITIES where W_TO_A[w,a] > 0 /\ W_TO_A[w,b]>0 /\ W_TO_A[w,a] < W_TO_A[w,b])
-    (activity_start[a]+1 <= activity_start[b])
+  forall(a, b in ACTIVITIES where W_TO_A[w,a] > 0 /\ W_TO_A[w,b]>0 /\ W_TO_A[w,a]+1 == W_TO_A[w,b])
+    (activity_start[a]+1 == activity_start[b])
   );
-%TODO: Use only two consecutive activities within a worksheet for the constraint
 
 % maximal number of blocked roads on a given day
-% constraint forall(rs in ROAD_SETS) (
-%   forall(d in DAYS)
-%     (sum (r in ROAD_CLOSE[rs]) (sum(a in ACTIVITIES where r == USED_ROADS[a]) (activity_used[a])) <= MAX_CLOSED[rs])
-%   );
+constraint forall(rs in ROAD_SETS) (
+  forall(d in DAYS)
+    (
+      sum (r in ROAD_CLOSE[rs]) 
+      (
+        sum(a in ACTIVITIES where r == USED_ROADS[a] /\ activity_start[a] == d) (activity_used[a])) <= MAX_CLOSED[rs]
+      )
+  );
 
 % Link start of worksheet and start of first activitiy
 constraint forall(w in WORKSHEETS) (
@@ -85,10 +88,10 @@ constraint forall(w in WORKSHEETS) (
     (activity_start[a] == start[w])
 );
 
-% constraint forall(c in CENTERS) (
-%   forall(d in DAYS)
-%     (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
-% );
+constraint forall(c in CENTERS) (
+  forall(d in DAYS)
+    (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
+);
 
 var int : objective;
 var int : first;
@@ -96,22 +99,13 @@ var int : second;
 
 constraint first = sum (w in WORKSHEETS) (IMPORTANCE[w]*used[w]);
 %constraint second = max (d in DAYS) (sum (r in ROADS) (sum(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r,d]*activity_used[a])));
-constraint second = max (d in DAYS) (sum (r in ROADS, a in ACTIVITIES where USED_ROADS[a] == r /\ activity_used[a]) (PERTUBATION[r,d]));
+constraint second = max (d in DAYS) (sum (r in ROADS, a in ACTIVITIES where USED_ROADS[a] == r /\ activity_used[a] /\ activity_start[a] == d) (PERTUBATION[r,d]));
 constraint objective =  first - second  ;
 
 solve maximize objective; 
 
-
-
- 
-
-
 output [if fix(used[w]) then (show(w-1)++" "++show(start[w]-1)++"\n" )else "" endif | w in WORKSHEETS];
 output [show(objective)++"\n"];
 output [show(first)++"\n"];
-output [show(second)++"\n"];
+output ["-", show(second)++"\n"];
 output [join(",",[show(activity_start[a])|a in ACTIVITIES])];
-  
-
-   
-
