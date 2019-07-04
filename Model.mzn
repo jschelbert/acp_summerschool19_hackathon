@@ -55,12 +55,17 @@ constraint forall(p in PRECEDE_SET)
 ((used[PRECEDE[p,1]] /\ used[PRECEDE[p,2]]) -> (start[PRECEDE[p,1]] + DURATION[PRECEDE[p,1]] <= start[PRECEDE[p,2]]));
   
     
-%All Activities of used WORKSHEETS have to be assigned
-constraint forall(w in WORKSHEETS) (forall(a in ACTIVITIES where W_TO_A[w,a] > 0)
-  (used[w] == activity_used[a]));
+% All Activities of used WORKSHEETS have to be assigned
+constraint forall(w in WORKSHEETS) (
+  forall(a in ACTIVITIES where W_TO_A[w,a] > 0)
+    (used[w] == activity_used[a])
+  );
     
 % Precedence within a worksheet
-constraint forall(w in WORKSHEETS) (forall(a in ACTIVITIES where W_TO_A[w,a] > 0)
-  (activity_used[a]));
-   
+constraint forall(w in WORKSHEETS) (
+  forall(a, b in ACTIVITIES where W_TO_A[w,a] > 0 /\ W_TO_A[w,b]>0 /\ W_TO_A[w,a] < W_TO_A[w,b])
+    (activity_start[a]+1 == activity_start[b])
+  );
+
+solve satisfy;
 

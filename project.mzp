@@ -1,0 +1,18 @@
+{
+    "builtinSolverConfigs": [
+    ],
+    "openFiles": [
+        "Model.mzn",
+        "Instances/data_HARD_5_3.dzn"
+    ],
+    "openTab": 0,
+    "projectFiles": [
+        "Instances/data_HARD_5_3.dzn",
+        "Model.mzn"
+    ],
+    "projectSolverConfigs": [
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.1.1",
+    "version": 105
+}
