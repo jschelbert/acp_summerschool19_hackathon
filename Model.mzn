@@ -35,15 +35,15 @@ array[CENTERS] of int : MAX_CAPACITY;
 
 
 %Variables
-array[WORKSHEETS] of var DAYS : start;
+array[WORKSHEETS] of var 0..n_days : start;
 array[WORKSHEETS] of var bool : used;
-array[ACTIVITIES] of var DAYS : activity_start;
+array[ACTIVITIES] of var 0..n_days : activity_start;
 array[ACTIVITIES] of var bool : activity_used;
 
 
 %Earliest and latest starting time
 constraint forall(w in WORKSHEETS)
-    ((start[w] >= EST[w] /\ start[w] <= LST[w]) \/ (used[w] == false));
+    (used[w] == true -> (start[w] >= EST[w] /\ start[w] <= LST[w]));
 
 %Earliest and latest starting time
 constraint forall(a in ACTIVITIES)
@@ -74,23 +74,23 @@ constraint forall(w in WORKSHEETS) (
 %TODO: Use only two consecutive activities within a worksheet for the constraint
 
 % maximal number of blocked roads on a given day
-constraint forall(rs in ROAD_SETS) (
-  forall(d in DAYS)
-    (sum (r in ROAD_CLOSE[rs]) (sum(a in ACTIVITIES where r == USED_ROADS[a]) (activity_used[a])) <= MAX_CLOSED[rs])
-  );
+% constraint forall(rs in ROAD_SETS) (
+%   forall(d in DAYS)
+%     (sum (r in ROAD_CLOSE[rs]) (sum(a in ACTIVITIES where r == USED_ROADS[a]) (activity_used[a])) <= MAX_CLOSED[rs])
+%   );
 
 % Link start of worksheet and start of first activitiy
 constraint forall(w in WORKSHEETS) (
-  forall(a in ACTIVITIES where W_TO_A[w,a] == 1)
+  forall(a in ACTIVITIES where W_TO_A[w, a] == 1)
     (activity_start[a] == start[w])
 );
 
-constraint forall(c in CENTERS) (
-  forall(d in DAYS)
-    (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
-);
+% constraint forall(c in CENTERS) (
+%   forall(d in DAYS)
+%     (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
+% );
 
 
 
-solve maximize sum (w in WORKSHEETS) (IMPORTANCE[w]*used[w]) - max (d in DAYS) (sum (r in ROADS) (sum(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r,d]*activity_used[a])));
-
+%solve maximize (sum (w in WORKSHEETS) (IMPORTANCE[w] * used[w]) ) - (max (d in DAYS) (sum (r in ROADS) (max(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r, d] * activity_used[a]) )) );
+solve maximize (sum (w in WORKSHEETS) (IMPORTANCE[w] * used[w]) ) - (max (d in DAYS) (sum (r in ROADS, a in ACTIVITIES where USED_ROADS[a] == r /\ activity_used[a] == true) (PERTUBATION[r, d]) ));
