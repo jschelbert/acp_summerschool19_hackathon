@@ -26,9 +26,8 @@ array[WORKSHEETS] of int : DURATION;             %Duration of the worksheet == n
 %array[WORKSHEETS,DAYS] of int : WORKERS_NEEDED; %Number of workers that are needed of each day in DURATION, the remaining day are filled with 0 --> we have to find something better
 array[ROAD_SETS] of int : MAX_CLOSED;            %Maximal number of roads in each set that can be closed simultaneously
 array[ROAD_SETS] of set of int: ROAD_CLOSE;      %Set of roads which refer to MAX_CLOSED
-array[PRECEDE_SET,1..2] of int : PRECEDE;        %The first Workbook_ID has to be finished before the second 
-array[ACTIVITIES] of int
- : USED_ROADS;
+array[PRECEDE_SET, 1..2] of int : PRECEDE;        %The first Workbook_ID has to be finished before the second 
+array[ACTIVITIES] of int : USED_ROADS;
 array[ACTIVITIES] of int : WORKERS_NEEDED;
 array[WORKSHEETS,ACTIVITIES] of int : W_TO_A;
 array[CENTERS] of int : MAX_CAPACITY;
@@ -43,7 +42,7 @@ array[ACTIVITIES] of var bool : activity_used;
 
 %Earliest and latest starting time
 constraint forall(w in WORKSHEETS )
-    ((start[w] >= EST[w] /\ start[w] <= LST[w]) \/ (used[w] == false));
+    ((start[w] >= EST[w] /\ start[w] <= LST[w]) /\ (used[w] == true));
 
 %Mandatory Worksheet
 constraint forall(w in WORKSHEETS where MANDATORY[w] == 1)
@@ -57,9 +56,11 @@ constraint forall(p in PRECEDE_SET)
   
     
 %All Activities of used WORKSHEETS have to be assigned
-%constraint forall(w in WORKSHEETS)
-
+constraint forall(w in WORKSHEETS) (forall(a in ACTIVITIES where W_TO_A[w,a] > 0)
+  (used[w] == activity_used[a]));
     
-
+% Precedence within a worksheet
+constraint forall(w in WORKSHEETS) (forall(a in ACTIVITIES where W_TO_A[w,a] > 0)
+  (activity_used[a]));
    
 
