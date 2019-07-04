@@ -171,7 +171,7 @@ LST= {print_lst(probleminstance.worksheets)};
 DURATION= {print_duration(probleminstance.worksheets)};
 MAX_CLOSED ={print_maxclosed(probleminstance.roadblock_constraints)};
 ROAD_CLOSE ={print_roadclosed(probleminstance.roadblock_constraints)};
-PRECEDE= {print_preceed(probleminstance.precedence_relations)}
+PRECEDE= {print_preceed(probleminstance.precedence_relations)};
 """)
 
 
