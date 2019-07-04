@@ -15,7 +15,7 @@ set of int : ROAD_SETS = 1..n_road_sets;    %Set of road block sets
 set of int : PRECEDE_SET = 1..n_precede;      %Set of precede Definitions
 
 %PARAMETERS
-array[ROADS,DAYS] of int : PERTUBATION;          %Pertubation costs per road and day, n_roads must be all 0
+array[ROADS, DAYS] of int : PERTUBATION;          %Pertubation costs per road and day, n_roads must be all 0
 array[WORKSHEETS] of int : USED_CENTER;          %The used center for each worksheet ID
 array[WORKSHEETS] of int : MANDATORY;           %True if Worksheet is mandatory
 array[WORKSHEETS] of int : IMPORTANCE;           %Importance of the worksheet, higher-> more important
@@ -27,9 +27,10 @@ array[WORKSHEETS] of int : DURATION;             %Duration of the worksheet == n
 array[ROAD_SETS] of int : MAX_CLOSED;            %Maximal number of roads in each set that can be closed simultaneously
 array[ROAD_SETS] of set of int: ROAD_CLOSE;      %Set of roads which refer to MAX_CLOSED
 array[PRECEDE_SET, 1..2] of int : PRECEDE;        %The first Workbook_ID has to be finished before the second 
-array[ACTIVITIES] of int : USED_ROADS;
+array[ACTIVITIES] of ROADS : USED_ROADS;
 array[ACTIVITIES] of int : WORKERS_NEEDED;
-array[WORKSHEETS,ACTIVITIES] of int : W_TO_A;
+array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
+array[WORKSHEETS, ACTIVITIES] of int : W_TO_A;
 array[CENTERS] of int : MAX_CAPACITY;
 
 
@@ -41,18 +42,22 @@ array[ACTIVITIES] of var bool : activity_used;
 
 
 %Earliest and latest starting time
-constraint forall(w in WORKSHEETS )
-    ((start[w] >= EST[w] /\ start[w] <= LST[w]) /\ (used[w] == true));
+constraint forall(w in WORKSHEETS)
+    ((start[w] >= EST[w] /\ start[w] <= LST[w]) \/ (used[w] == false));
+
+%Earliest and latest starting time
+constraint forall(a in ACTIVITIES)
+    (activity_used[a] == true -> activity_start[a]>0);
 
 %Mandatory Worksheet
 constraint forall(w in WORKSHEETS where MANDATORY[w] == 1)
-    (used[w] = true);
+  (used[w] = true);
     
 %Precedence between Worksheet
 
 constraint forall(p in PRECEDE_SET)
 %output [ "start:" , join(",",[show(p)| p in PRECEDE_SET]), join(",", [show(IMPORTANCE[0]) | p in PRECEDE_SET])];
-((used[PRECEDE[p,1]] /\ used[PRECEDE[p,2]]) -> (start[PRECEDE[p,1]] + DURATION[PRECEDE[p,1]] <= start[PRECEDE[p,2]]));
+  ((used[PRECEDE[p,1]] /\ used[PRECEDE[p,2]]) -> (start[PRECEDE[p,1]] + DURATION[PRECEDE[p,1]] <= start[PRECEDE[p,2]]));
   
     
 % All Activities of used WORKSHEETS have to be assigned
@@ -64,8 +69,28 @@ constraint forall(w in WORKSHEETS) (
 % Precedence within a worksheet
 constraint forall(w in WORKSHEETS) (
   forall(a, b in ACTIVITIES where W_TO_A[w,a] > 0 /\ W_TO_A[w,b]>0 /\ W_TO_A[w,a] < W_TO_A[w,b])
-    (activity_start[a]+1 == activity_start[b])
+    (activity_start[a]+1 <= activity_start[b])
+  );
+%TODO: Use only two consecutive activities within a worksheet for the constraint
+
+% maximal number of blocked roads on a given day
+constraint forall(rs in ROAD_SETS) (
+  forall(d in DAYS)
+    (sum (r in ROAD_CLOSE[rs]) (sum(a in ACTIVITIES where r == USED_ROADS[a]) (activity_used[a])) <= MAX_CLOSED[rs])
   );
 
-solve satisfy;
+% Link start of worksheet and start of first activitiy
+constraint forall(w in WORKSHEETS) (
+  forall(a in ACTIVITIES where W_TO_A[w,a] == 1)
+    (activity_start[a] == start[w])
+);
+
+constraint forall(c in CENTERS) (
+  forall(d in DAYS)
+    (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
+);
+
+
+
+solve maximize sum (w in WORKSHEETS) (IMPORTANCE[w]*used[w]) - max (d in DAYS) (sum (r in ROADS) (sum(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r,d]*activity_used[a])));
 
