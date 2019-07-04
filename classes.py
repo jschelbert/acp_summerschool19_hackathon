@@ -149,7 +149,7 @@ def print_roadclosed(roadblocks):
         s = "[{"
         for roadblock in roadblocks:
             for road in roadblock.affected_road_ids:
-                s = s + str(road) + ","
+                s = s + str(road+1) + ","
             s=s[:-1]+"},{"
         s = s[:-2] + "]"
     else:
@@ -162,7 +162,7 @@ def print_preceed(precedence_relations):
     if len(precedence_relations) > 0:
         s = "[|"
         for precedence in precedence_relations:
-            s = s + str(precedence[0]) + "," + str(precedence[1]) + ",|"
+            s = s + str(precedence[0]+1) + "," + str(precedence[1]+1) + ",|"
         s = s[:-2] + "|]"
     else:
         s = "[]"
