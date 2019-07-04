@@ -3,12 +3,25 @@
     ],
     "openFiles": [
         "Model.mzn",
-        "Instances/data_HARD_5_3.dzn"
+        "Model_EASY.mzn"
     ],
-    "openTab": 0,
+    "openTab": 1,
     "projectFiles": [
+        "Instances/EASY_1000_100.dzn",
+        "Instances/EASY_2000_500.dzn",
+        "Instances/EASY_200_50.dzn",
+        "Instances/EASY_2500_1000.dzn",
+        "Instances/EASY_5000_1500.dzn",
+        "Instances/EASY_5_3.dzn",
+        "Instances/HARD_200_50.dzn",
+        "Instances/HARD_5_3.dzn",
+        "Instances/MEDIUM_200_50.dzn",
+        "Instances/MEDIUM_5_3.dzn",
         "Instances/data_HARD_5_3.dzn",
-        "Model.mzn"
+        "Model.mzn",
+        "Model_EASY.mzn",
+        "Model_HARD.mzn",
+        "Model_MEDIUM.mzn"
     ],
     "projectSolverConfigs": [
     ],
