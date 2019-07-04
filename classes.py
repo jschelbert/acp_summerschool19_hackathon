@@ -151,7 +151,7 @@ def print_roadclosed(roadblocks):
             for road in roadblock.affected_road_ids:
                 s = s + str(road) + ","
             s=s[:-1]+"},{"
-        s = s[:-2] + "}]"
+        s = s[:-2] + "]"
     else:
         s = "[]"
 
