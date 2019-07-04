@@ -155,7 +155,7 @@ def print_roadclosed(roadblocks):
             s += "{"
             for road in roadblock.affected_road_ids:
                 s = s + str(road) + ","
-            s = s + "}, "
+            s = s[:-1] + "}, "
         s = s[:-2] + "]"
     else:
         s = "[]"
@@ -232,8 +232,8 @@ def print_w2a(worksheets, nActivities):
     for l in L:
         for b in l:
             op = op + str(b) + ","
-        op = op + "|"
-    op = op[:-2] + "|]"
+        op = op[:-1] + "|"
+    op = op + "]"
     return op
 
 
