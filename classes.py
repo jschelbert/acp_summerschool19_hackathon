@@ -217,11 +217,9 @@ def print_activitycenter(workcenters):
 def print_w2a(worksheets, nActivities):
     L = []
     c_index = 0
-
     for worksheet in worksheets:
         rank = 1
         s = [0] * nActivities
-        print(s)
         for a in worksheet.activities:
             print(c_index + rank - 1)
             s[c_index + rank - 1] = rank
