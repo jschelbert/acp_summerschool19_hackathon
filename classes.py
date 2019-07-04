@@ -178,8 +178,8 @@ def print_preceed(precedence_relations):
 def print_capacity(workcenters):
     s = "["
     for w in workcenters:
-        s = s + str(w.number_of_workers)
-    s = s + "]"
+        s = s + str(w.number_of_workers) + ","
+    s = s[:-1] + "]"
     return s
 
 
