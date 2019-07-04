@@ -25,10 +25,11 @@ ROAD_CLOSE = [{1, 2, 3, 4, 5}, {3, 4, 5}];      %Set of roads which refer to MAX
 PRECEDE = [|3, 1|];  %The first Workbook_ID has to be finished before the second 
 MAX_CAPACITY = [232];
 
-W_TO_A = 
-[| 1, 2, 3, 0, 0, 0, 0, 0
- | 0, 0, 0, 1, 2, 3, 4, 0
- | 0, 0, 0, 0, 0, 0, 0, 1|];
+%W_TO_A = 
+%[| 1, 2, 3, 0, 0, 0, 0, 0
+% | 0, 0, 0, 1, 2, 3, 4, 0
+% | 0, 0, 0, 0, 0, 0, 0, 1|];
+W_A = [{1, 2, 3}, {4, 5, 6, 7}, {8}];
 ACTIVITY_CENTER = [1, 1, 1, 1, 1, 1, 1, 1];
 ROAD_ACTIVITIES = [{1, 4}, {6}, {}, {2, 5, 7, 8}, {3}];
  
