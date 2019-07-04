@@ -47,8 +47,8 @@ def read_data(filename):
         for l in range(duration):
             activity_rank += 1
             activity_id += 1
-            a = Activity(id=activity_id, rank=activity_rank, affected_road_id=int(q[7 + 2 * l]),
-                                       workers_needed=int(q[8 + 2 * l]), worksheet_id=worksheet_id)
+            a = Activity(id=activity_id, rank=activity_rank, affected_road_id=int(q[7 +  l]),
+                                       workers_needed=int(q[7+duration + l]), worksheet_id=worksheet_id)
             all_activities.append(a)
             activities.append(a)
         worksheets.append(Worksheet(worksheet_id, importance, mandatory, workcenter_id, duration, est, lst, activities))
@@ -62,13 +62,13 @@ def read_data(filename):
         if q[0] == 'M':
             num_roads_blocked = int(q[1])
             roads_blocked = []
-            for i in range(len(q) - 1):
-                roads_blocked.append(int(q[i + 1]))
+            for i in range(2,len(q)):
+                roads_blocked.append(int(q[i]))
             roadblock_constraints.append(RoadblockConstraint(max_number_allowed=num_roads_blocked,
                                                              affected_road_ids=roads_blocked))
         if q[0] == 'P':
-            predced = int(q[1])
-            successor = int(q[2])
+            predced = int(q[1])+1
+            successor = int(q[2])+1
             precendence_relations.append((predced, successor))
         lines_left -= 1
         line_num += 1
