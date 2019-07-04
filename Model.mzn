@@ -71,16 +71,12 @@ constraint forall(p in PRECEDE_SET)
   
     
 % All Activities of used WORKSHEETS have to be assigned
-constraint forall(w in WORKSHEETS) (
-  forall(a in W_A[w])
-    (used[w] == activity_used[a])
-  );
+constraint forall(w in WORKSHEETS, a in W_A[w])
+    (used[w] == activity_used[a]);
     
 % Precedence within a worksheet
-constraint forall(w in WORKSHEETS) (
-  forall(a, b in W_A[w] where a+1 == b)
-    (activity_start[a]+1 == activity_start[b])
-  );
+constraint forall(w in WORKSHEETS, a, b in W_A[w] where a+1 == b)
+    (activity_start[a]+1 == activity_start[b]);
 
 % maximal number of blocked roads on a given day - only relevant in HARD instances
 constraint forall(rs in ROAD_SETS) (
