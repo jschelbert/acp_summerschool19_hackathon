@@ -30,6 +30,7 @@ def read_data(filename):
         line_num += 1
     ### worksheets
     worksheets = []
+    activity_rank =0
     for i in range(nWS):
         q = mylist[line_num].split()
         worksheet_id = int(q[0])
@@ -40,9 +41,12 @@ def read_data(filename):
         lst = int(q[5])
         duration = int(q[6])
         activities = []
+        
         for l in range(duration):
-            activities.append(Activity(rank=l, affected_road_id=int(q[7 + 2 * l]), workers_needed=int(q[8 + 2 * l]),
-                                       worksheet_id=worksheet_id))
+            activity_rank+=1
+            
+            activities.append(Activity(rank= activity_rank, affected_road_id=int(q[7 + 2 * l]), 
+                                       workers_needed=int(q[8 + 2 * l]),worksheet_id=worksheet_id))
         worksheets.append(Worksheet(worksheet_id, importance, mandatory, workcenter_id, duration, est, lst, activities))
         line_num += 1
     lines_left = len(mylist) - line_num
@@ -67,7 +71,7 @@ def read_data(filename):
 
     return nDays,nActivities, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
 
-def print_roads(roads):
+def print_perturbation(roads):
     s= "["
     for road in roads:
         s=s+"|"
@@ -75,11 +79,11 @@ def print_roads(roads):
             s= s+ str(r)+","
     s= s[:-1]+"|]"
     return s
-def print_wc(worksheets):
+def print_usedcenter(worksheets):
     s= "["
     for worksheet in worksheets:
         #print(worksheet.workcenter)
-        s= s+str(worksheet.workcenter[0])+","
+        s= s+str(worksheet.workcenter[0]+1)+","
     s= s[:-1]+"]"
     return s
 
@@ -99,13 +103,13 @@ def print_importance(worksheets):
 def print_est(worksheets):
     s= "["
     for worksheet in worksheets:
-        s= s+str(worksheet.earliest_start)+","
+        s= s+str(worksheet.earliest_start+1)+","
     s= s[:-1]+"]"
     return s
 def print_lst(worksheets):
     s= "["
     for worksheet in worksheets:
-        s= s+str(worksheet.latest_start)+","
+        s= s+str(worksheet.latest_start+1)+","
     s= s[:-1]+"]"
     return s
 def print_duration(worksheets):
@@ -128,12 +132,12 @@ def print_maxclosed(roadblocks):
 def print_roadclosed(roadblocks):
     
     if len(roadblocks)>0:
-        s= "[|"
+        s= "[{"
         for roadblock in roadblocks:
             for road in roadblock.affected_road_ids:
                 s= s+str(road)+"," 
-            s=s+"|"
-        s= s[:-2]+"|]"
+            s=s+"}"
+        s= s[:-2]+"}]"
     else:
         s= "[]"
 
@@ -149,9 +153,70 @@ def print_preceed(precedence_relations):
         s= "[]"
 
     return s
+def print_capacity(workcenters):
+    s ="["
+    for w in workcenters:
+        s=s+ str(w.number_of_workers)
+    s=s+"]"
+    return s
+#USED_ROADS
+def print_useroads(workcenters):
+    s="["
+    for w in workcenters:
+        for a in w.activities:
+            s= s+str(a.affected_road_id+1)+","
+    s= s[:-1]+"]"
+    return s
+
+#WORKERS_NEEDED
+def print_workrsneeded(workcenters):
+    s="["
+    for w in workcenters:
+        for a in w.activities:
+            s= s+str(a.workers_needed)+","
+    s= s[:-1]+"]"
+    return s
+
+#ACTIVITY_CENTER
+def print_activitycenter(workcenters):
+    s="["
+    for w in workcenters:
+        for a in w.activities:
+            s= s+str(w.workcenter[0]+1)+","
+    s= s[:-1]+"]"
+    return s
+    
+
+#W_TO_A
+def print_w2a(worksheets,nActivities):
+    L=[]
+    c_index= 0
+    
+    for worksheet in worksheets:
+        rank=1
+        s= [0]*nActivities
+        print(s)
+        for a in worksheet.activities:
+            print(c_index+rank-1)
+            s[c_index+rank-1]= rank
+            rank+=1
+        c_index+= rank-1
+        L.append(s)
+    op="[|"
+    for l in L:
+        for b in l:
+            op= op+ str(b)+","
+        op=op+"|"
+    op= op[:-2]+"|]"
+    return op
+            
+    
+        
     
     
-    
+
+
+
 def write_data_file(filename, probleminstance):
     with open(filename, "w") as f:
         f.write(f"""
@@ -159,11 +224,11 @@ n_days = {probleminstance.number_of_days};
 n_roads = {len(probleminstance.roads)};      
 n_centers = {len(probleminstance.workcenters)};    
 n_worksheets = {len(probleminstance.worksheets)}; 
-n_activitys = {probleminstance.number_of_activities};  
+n_activities = {probleminstance.number_of_activities};  
 n_road_sets = {len(probleminstance.roadblock_constraints)};  
 n_precede = {len(probleminstance.precedence_relations)};
-PERTURBATIONS=  {print_roads(probleminstance.roads)};
-USED_CENTER= {print_wc(probleminstance.worksheets)};
+PERTUBATION=  {print_perturbation(probleminstance.roads)};
+USED_CENTER= {print_usedcenter(probleminstance.worksheets)};
 MANDATORY= {print_mandatory(probleminstance.worksheets)};
 IMPORTANCE= {print_importance(probleminstance.worksheets)};
 EST= {print_est(probleminstance.worksheets)};
@@ -172,6 +237,11 @@ DURATION= {print_duration(probleminstance.worksheets)};
 MAX_CLOSED ={print_maxclosed(probleminstance.roadblock_constraints)};
 ROAD_CLOSE ={print_roadclosed(probleminstance.roadblock_constraints)};
 PRECEDE= {print_preceed(probleminstance.precedence_relations)};
+MAX_CAPACITY = {print_capacity(probleminstance.workcenters)};
+W_TO_A = {print_w2a(probleminstance.worksheets,probleminstance.number_of_activities)};
+WORKERS_NEEDED = {print_workrsneeded(probleminstance.worksheets)};
+USED_ROADS = {print_useroads(probleminstance.worksheets)};
+ACTIVITY_CENTER = {print_activitycenter(probleminstance.worksheets)};
 """)
 
 
