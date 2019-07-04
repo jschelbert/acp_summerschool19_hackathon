@@ -67,7 +67,91 @@ def read_data(filename):
 
     return nDays,nActivities, worksheets, roads, workcenters, roadblock_constraints, precendence_relations
 
+def print_roads(roads):
+    s= "["
+    for road in roads:
+        s=s+"|"
+        for r in road.pertubation:
+            s= s+ str(r)+","
+    s= s[:-1]+"|]"
+    return s
+def print_wc(worksheets):
+    s= "["
+    for worksheet in worksheets:
+        #print(worksheet.workcenter)
+        s= s+str(worksheet.workcenter[0])+","
+    s= s[:-1]+"]"
+    return s
 
+def print_mandatory(worksheets):
+    s= "["
+    for worksheet in worksheets:
+        #print(worksheet.workcenter)
+        s= s+str(worksheet.mandatory[0])+","
+    s= s[:-1]+"]"
+    return s
+def print_importance(worksheets):
+    s= "["
+    for worksheet in worksheets:
+        s= s+str(worksheet.importance)+","
+    s= s[:-1]+"]"
+    return s
+def print_est(worksheets):
+    s= "["
+    for worksheet in worksheets:
+        s= s+str(worksheet.earliest_start)+","
+    s= s[:-1]+"]"
+    return s
+def print_lst(worksheets):
+    s= "["
+    for worksheet in worksheets:
+        s= s+str(worksheet.latest_start)+","
+    s= s[:-1]+"]"
+    return s
+def print_duration(worksheets):
+    s= "["
+    for worksheet in worksheets:
+        s= s+str(worksheet.duration)+","
+    s= s[:-1]+"]"
+    return s
+def print_maxclosed(roadblocks):
+    
+    if len(roadblocks)>0:
+        s= "["
+        for roadblock in roadblocks:
+            s= s+str(roadblock.max_number_allowed)+","
+        s= s[:-1]+"]"
+    else:
+        s= "[]"
+
+    return s
+def print_roadclosed(roadblocks):
+    
+    if len(roadblocks)>0:
+        s= "[|"
+        for roadblock in roadblocks:
+            for road in roadblock.affected_road_ids:
+                s= s+str(road)+"," 
+            s=s+"|"
+        s= s[:-2]+"|]"
+    else:
+        s= "[]"
+
+    return s
+def print_preceed(precedence_relations):
+    
+    if len(precedence_relations)>0:
+        s= "[|"
+        for precedence in precedence_relations:
+                s= s+ str(precedence[0]) +","+str(precedence[1])+",|"
+        s= s[:-2]+"|]"
+    else:
+        s= "[]"
+
+    return s
+    
+    
+    
 def write_data_file(filename, probleminstance):
     with open(filename, "w") as f:
         f.write(f"""
@@ -77,7 +161,19 @@ n_centers = {len(probleminstance.workcenters)};
 n_worksheets = {len(probleminstance.worksheets)}; 
 n_activitys = {probleminstance.number_of_activities};  
 n_road_sets = {len(probleminstance.roadblock_constraints)};  
-n_precede = {len(probleminstance.precedence_relations)};""")
+n_precede = {len(probleminstance.precedence_relations)};
+perturbations=  {print_roads(probleminstance.roads)};
+USED_CENTER= {print_wc(probleminstance.worksheets)};
+MANDATORY= {print_mandatory(probleminstance.worksheets)};
+IMPORTANCE= {print_importance(probleminstance.worksheets)};
+EST= {print_est(probleminstance.worksheets)};
+LST= {print_lst(probleminstance.worksheets)};
+DURATION= {print_duration(probleminstance.worksheets)};
+MAX_CLOSED ={print_maxclosed(probleminstance.roadblock_constraints)};
+ROAD_CLOSE ={print_roadclosed(probleminstance.roadblock_constraints)};
+PRECEDE= {print_preceed(probleminstance.precedence_relations)}
+""")
+
 
 
 class Worksheet(object):
