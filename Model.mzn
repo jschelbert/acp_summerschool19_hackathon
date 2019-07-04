@@ -32,6 +32,7 @@ array[ACTIVITIES] of int : WORKERS_NEEDED;
 array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
 array[WORKSHEETS, ACTIVITIES] of int : W_TO_A;
 array[CENTERS] of int : MAX_CAPACITY;
+array[ROADS] of set of ACTIVITIES: ROAD_ACTIVITIES;
 
 
 %Variables
@@ -99,8 +100,8 @@ var int : second;
 
 constraint first = sum (w in WORKSHEETS) (IMPORTANCE[w]*used[w]);
 %constraint second = max (d in DAYS) (sum (r in ROADS) (sum(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r,d]*activity_used[a])));
-constraint second = max (d in DAYS) (sum (r in ROADS, a in ACTIVITIES where USED_ROADS[a] == r /\ activity_used[a] /\ activity_start[a] == d) (PERTUBATION[r,d]));
-constraint objective =  first - second  ;
+constraint second = max (d in DAYS) (sum (r in ROADS, a in ROAD_ACTIVITIES[r] where activity_used[a] /\ activity_start[a] == d) (PERTUBATION[r,d]));
+constraint objective =  first - second;
 
 solve maximize objective; 
 
