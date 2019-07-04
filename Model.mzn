@@ -1,3 +1,11 @@
+include "cumulative.mzn";
+%cumulative(array[int] of var int: s, array[int] of var int: d,
+%           array[int] of var int: r, var int: b)
+%
+%It requires that a set of tasks given by start times s, durations d, and resource requirements r, never require more than a global resource bound b at any one time.
+
+
+
 %SETS
 int : n_days;       %Number of Working Days
 int : n_roads;      %Number of days
@@ -25,12 +33,13 @@ array[WORKSHEETS] of int : DURATION;             %Duration of the worksheet == n
 %array[WORKSHEETS,DAYS] of int : USED_ROADS;     %Road_ID that is closed of each day in DURATION, the remaining are filled with the DUmmy Road n_roads --> we have to find something better
 %array[WORKSHEETS,DAYS] of int : WORKERS_NEEDED; %Number of workers that are needed of each day in DURATION, the remaining day are filled with 0 --> we have to find something better
 array[ROAD_SETS] of int : MAX_CLOSED;            %Maximal number of roads in each set that can be closed simultaneously
-array[ROAD_SETS] of set of int: ROAD_CLOSE;      %Set of roads which refer to MAX_CLOSED
-array[PRECEDE_SET, 1..2] of int : PRECEDE;        %The first Workbook_ID has to be finished before the second 
+array[ROAD_SETS] of set of ROADS: ROAD_CLOSE;      %Set of roads which refer to MAX_CLOSED
+array[PRECEDE_SET, 1..2] of WORKSHEETS : PRECEDE;        %The first Workbook_ID has to be finished before the second 
 array[ACTIVITIES] of ROADS : USED_ROADS;
 array[ACTIVITIES] of int : WORKERS_NEEDED;
 array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
-array[WORKSHEETS, ACTIVITIES] of int : W_TO_A;
+%array[WORKSHEETS, ACTIVITIES] of int : W_TO_A;
+array[WORKSHEETS] of set of ACTIVITIES: W_A;
 array[CENTERS] of int : MAX_CAPACITY;
 array[ROADS] of set of ACTIVITIES: ROAD_ACTIVITIES;
 
@@ -63,17 +72,17 @@ constraint forall(p in PRECEDE_SET)
     
 % All Activities of used WORKSHEETS have to be assigned
 constraint forall(w in WORKSHEETS) (
-  forall(a in ACTIVITIES where W_TO_A[w,a] > 0)
+  forall(a in W_A[w])
     (used[w] == activity_used[a])
   );
     
 % Precedence within a worksheet
 constraint forall(w in WORKSHEETS) (
-  forall(a, b in ACTIVITIES where W_TO_A[w,a] > 0 /\ W_TO_A[w,b]>0 /\ W_TO_A[w,a]+1 == W_TO_A[w,b])
+  forall(a, b in W_A[w] where a+1 == b)
     (activity_start[a]+1 == activity_start[b])
   );
 
-% maximal number of blocked roads on a given day
+% maximal number of blocked roads on a given day - only relevant in HARD instances
 constraint forall(rs in ROAD_SETS) (
   forall(d in DAYS)
     (
@@ -85,10 +94,13 @@ constraint forall(rs in ROAD_SETS) (
 
 % Link start of worksheet and start of first activitiy
 constraint forall(w in WORKSHEETS) (
-  forall(a in ACTIVITIES where W_TO_A[w, a] == 1)
+  forall(a in W_A[w] where a == min (b in W_A[w])(b))
     (activity_start[a] == start[w])
 );
 
+% Capacity of the workcenters - relevant only in MEDIUM and HARD instances
+
+%TODO: Use the cumulative constraint?!
 constraint forall(c in CENTERS) (
   forall(d in DAYS)
     (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])

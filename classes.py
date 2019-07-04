@@ -80,7 +80,7 @@ def print_perturbation(roads):
     s = "["
     for road in roads:
         s += "|" + ",".join([str(r) for r in road.pertubation])
-    s = s[:-1] + "|]"
+    s += "|]"
     return s
 
 
@@ -161,8 +161,8 @@ def print_preceed(precedence_relations):
     if len(precedence_relations) > 0:
         s = "[|"
         for precedence in precedence_relations:
-            s = s + str(precedence[0]) + "," + str(precedence[1]) + ",|"
-        s = s[:-2] + "|]"
+            s = s + str(precedence[0]) + "," + str(precedence[1]) + "|"
+        s += "]"
     else:
         s = "[]"
 
@@ -170,10 +170,7 @@ def print_preceed(precedence_relations):
 
 
 def print_capacity(workcenters):
-    s = "["
-    for w in workcenters:
-        s = s + str(w.number_of_workers) + ","
-    s = s[:-1] + "]"
+    s = "[" + ",".join([str(w.number_of_workers) for w in workcenters]) + "]"
     return s
 
 
@@ -227,6 +224,14 @@ def print_w2a(worksheets, nActivities):
     return op
 
 
+def print_wa(worksheets):
+    s = "["
+    for w in worksheets:
+        s += "{" + ",".join([str(a.id) for a in w.activities]) + "},"
+    s = s[:-1] + "]"
+    return s
+
+
 def print_road_activities(probleminstance):
     s = "["
     for road in probleminstance.roads:
@@ -259,13 +264,13 @@ MAX_CLOSED ={print_maxclosed(probleminstance.roadblock_constraints)};
 ROAD_CLOSE ={print_roadclosed(probleminstance.roadblock_constraints)};
 PRECEDE= {print_preceed(probleminstance.precedence_relations)};
 MAX_CAPACITY = {print_capacity(probleminstance.workcenters)};
-W_TO_A = {print_w2a(probleminstance.worksheets, probleminstance.number_of_activities)};
+W_A = {print_wa(probleminstance.worksheets)};
 WORKERS_NEEDED = {print_workrsneeded(probleminstance.worksheets)};
 USED_ROADS = {print_useroads(probleminstance.worksheets)};
 ACTIVITY_CENTER = {print_activitycenter(probleminstance.worksheets)};
 ROAD_ACTIVITIES = {print_road_activities(probleminstance)};
 """)
-
+# W_TO_A = {print_w2a(probleminstance.worksheets, probleminstance.number_of_activities)};
 
 class Worksheet(object):
 
