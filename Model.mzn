@@ -33,7 +33,22 @@ array[PRECEDE_SET,0..1] of int : PRECEDE;  %The first Workbook_ID has to be fini
 array[WORKSHEETS] of var DAYS : start;
 array[WORKSHEETS] of var bool : used;
 
-%Earliest starting time
+%Earliest and latest starting time
+constraint forall(w in WORKSHEETS where used[w])
+    (start[w] >= EST[w] /\ start[w] <= LST[w]);
+
+%Mandatory Worksheet
+constraint forall(w in WORKSHEETS where MANDATORY[w] == true)
+    (used[w] = true);
+    
+%Precedence between Worksheet
+constraint forall(p in PRECEDE_SET where used[PRECEDE[p,0]] == true )
+    (start[PRECEDE[p,0]] <= start[PRECEDE[p,1]]);
+    
+%Blocked Roads
+constraint forall(w in WORKSHEETS where used[w])
+    (start[w] 
+    
 
    
 
