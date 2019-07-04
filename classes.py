@@ -47,8 +47,8 @@ def read_data(filename):
         for l in range(duration):
             activity_rank += 1
             activity_id += 1
-            a = Activity(id=activity_id, rank=activity_rank, affected_road_id=int(q[7 +  l]),
-                                       workers_needed=int(q[7+duration + l]), worksheet_id=worksheet_id)
+            a = Activity(id=activity_id, rank=activity_rank, affected_road_id=int(q[7 + l]),
+                         workers_needed=int(q[7 + duration + l]), worksheet_id=worksheet_id)
             all_activities.append(a)
             activities.append(a)
         worksheets.append(Worksheet(worksheet_id, importance, mandatory, workcenter_id, duration, est, lst, activities))
@@ -62,13 +62,13 @@ def read_data(filename):
         if q[0] == 'M':
             num_roads_blocked = int(q[1])
             roads_blocked = []
-            for i in range(2,len(q)):
+            for i in range(2, len(q)):
                 roads_blocked.append(int(q[i]))
             roadblock_constraints.append(RoadblockConstraint(max_number_allowed=num_roads_blocked,
                                                              affected_road_ids=roads_blocked))
         if q[0] == 'P':
-            predced = int(q[1])+1
-            successor = int(q[2])+1
+            predced = int(q[1]) + 1
+            successor = int(q[2]) + 1
             precendence_relations.append((predced, successor))
         lines_left -= 1
         line_num += 1
@@ -79,19 +79,13 @@ def read_data(filename):
 def print_perturbation(roads):
     s = "["
     for road in roads:
-        s = s + "|"
-        for r in road.pertubation:
-            s = s + str(r) + ","
+        s += "|" + ",".join([str(r) for r in road.pertubation])
     s = s[:-1] + "|]"
     return s
 
 
 def print_usedcenter(worksheets):
-    s = "["
-    for worksheet in worksheets:
-        # print(worksheet.workcenter)
-        s = s + str(worksheet.workcenter[0] + 1) + ","
-    s = s[:-1] + "]"
+    s = "[" + ",".join([str(worksheet.workcenter[0] + 1) for worksheet in worksheets]) + "]"
     return s
 
 
@@ -221,24 +215,22 @@ def print_w2a(worksheets, nActivities):
         rank = 1
         s = [0] * nActivities
         for a in worksheet.activities:
-            print(c_index + rank - 1)
+            #print(c_index + rank - 1)
             s[c_index + rank - 1] = rank
             rank += 1
         c_index += rank - 1
         L.append(s)
-    op = "[|"
+    op = "["
     for l in L:
-        for b in l:
-            op = op + str(b) + ","
-        op = op[:-1] + "|"
-    op = op + "]"
+        op += "|" + ",".join([str(b) for b in l])
+    op = op + "|]"
     return op
 
 
 def print_road_activities(probleminstance):
     s = "["
     for road in probleminstance.roads:
-        print(f"{road.id}")
+        #print(f"{road.id}")
         s += "{"
         s += f"{','.join([str(a.id) for a in probleminstance.activities if a.affected_road_id == road.id])}"
         s += "},"
@@ -355,3 +347,13 @@ class ProblemInstance(object):
 
     def __str__(self):
         return f"Problem instance read from {self.filename} - output in {self.output_filename}"
+
+
+if __name__ == "__main__":
+    import glob
+
+    for file in glob.glob("Instances/*.txt"):
+        print(file[:-3] + "dzn")
+        test = ProblemInstance(filename=file)
+        print("file read in and instance generated. Now writing the data file.")
+        write_data_file(file[:-3] + "dzn", test)
