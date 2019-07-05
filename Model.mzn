@@ -1,4 +1,4 @@
-include "cumulative.mzn";
+%include "cumulative.mzn";
 %cumulative(array[int] of var int: s, array[int] of var int: d,
 %           array[int] of var int: r, var int: b)
 %
@@ -46,23 +46,22 @@ array[ROADS] of set of ACTIVITIES: ROAD_ACTIVITIES;
 
 
 %Variables
-array[WORKSHEETS] of var 0..n_days : start;
 array[WORKSHEETS] of var bool : used;
-array[ACTIVITIES] of var 0..n_days : activity_start;
 array[ACTIVITIES] of var bool : activity_used;
-
-
-%Earliest and latest starting time
-constraint forall(w in WORKSHEETS)
-    (used[w] == true -> (start[w] >= EST[w] /\ start[w] <= LST[w]));
-
-%Earliest and latest starting time
-constraint forall(a in ACTIVITIES)
-    (activity_used[a] == true -> activity_start[a]>0);
+array[WORKSHEETS] of var 0..n_days : start;
+array[ACTIVITIES] of var 0..n_days : activity_start;
 
 %Mandatory Worksheet
 constraint forall(w in WORKSHEETS where MANDATORY[w] == 1)
   (used[w] = true);
+
+%Earliest and latest starting time
+constraint forall(w in WORKSHEETS)
+    (used[w] -> (start[w] >= EST[w] /\ start[w] <= LST[w]));
+
+%Earliest and latest starting time
+constraint forall(a in ACTIVITIES)
+    (activity_used[a] -> activity_start[a]>0);
     
 %Precedence between Worksheet
 
@@ -81,36 +80,34 @@ constraint forall(w in WORKSHEETS, a, b in W_A[w] where a+1 == b)
 
 
 % maximal number of blocked roads on a given day - only relevant in HARD instances
-constraint forall(rs in ROAD_SETS) (
-  forall(d in DAYS)
-    (
-      sum (r in ROAD_CLOSE[rs]) 
-      (
-        sum(a in ACTIVITIES where r == USED_ROADS[a] /\ activity_start[a] == d) (activity_used[a])) <= MAX_CLOSED[rs]
-      )
-  );
+% constraint forall(rs in ROAD_SETS) (
+%   forall(d in DAYS)
+%     (
+%       sum (r in ROAD_CLOSE[rs]) 
+%       (
+%         sum(a in ACTIVITIES where r == USED_ROADS[a] /\ activity_start[a] == d) (activity_used[a])) <= MAX_CLOSED[rs]
+%       )
+%   );
 
 % Link start of worksheet and start of first activitiy
-constraint forall(w in WORKSHEETS) (
-  forall(a in W_A[w] where a == min (b in W_A[w])(b))
-    (activity_start[a] == start[w])
-);
+constraint forall(w in WORKSHEETS, a in W_A[w] where a == min (b in W_A[w])(b))
+    (activity_start[a] == start[w]);
 
 % Capacity of the workcenters - relevant only in MEDIUM and HARD instances
 
 %TODO: Use the cumulative constraint?!
-constraint forall(c in CENTERS) (
-  forall(d in DAYS)
-    (sum (a in CENTER_ACTIVITIES[c] where activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
-);
+% constraint forall(c in CENTERS) (
+%   forall(d in DAYS)
+%     (sum (a in CENTER_ACTIVITIES[c] where activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
+% );
 
 var int : objective;
 var int : first;
 var int : second;
 
 constraint first = sum (w in WORKSHEETS) (IMPORTANCE[w]*used[w]);
-%constraint second = max (d in DAYS) (sum (r in ROADS) (sum(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r,d]*activity_used[a])));
-constraint second = max (d in DAYS) (sum (r in ROADS, a in ROAD_ACTIVITIES[r] where activity_used[a] /\ activity_start[a] == d) (PERTUBATION[r,d]));
+%constraint second = max (d in DAYS) (sum (r in ROADS) (sum(a in ROAD_ACTIVITIES[r]) (PERTUBATION[r,d]*activity_used[a])));
+constraint second = max (d in DAYS) (sum (r in ROADS, a in ROAD_ACTIVITIES[r]) (PERTUBATION[r,d]* activity_used[a]*(activity_start[a] == d)));
 constraint objective =  first - second;
 
 solve maximize objective; 
