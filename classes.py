@@ -195,11 +195,19 @@ def print_workrsneeded(workcenters):
 
 
 # ACTIVITY_CENTER
-def print_activitycenter(workcenters):
+def print_activitycenter(worksheets):
     s = "["
-    for w in workcenters:
+    for w in worksheets:
         for a in w.activities:
             s = s + str(w.workcenter[0] + 1) + ","
+    s = s[:-1] + "]"
+    return s
+
+
+def print_centeractivities(worksheets, workcenters):
+    s = "["
+    for wc in workcenters:
+        s += "{" + ",".join([str(a.id) for w in worksheets for a in w.activities if w.workcenter[0] == wc.id]) + "},"
     s = s[:-1] + "]"
     return s
 
@@ -267,7 +275,8 @@ MAX_CAPACITY = {print_capacity(probleminstance.workcenters)};
 W_A = {print_wa(probleminstance.worksheets)};
 WORKERS_NEEDED = {print_workrsneeded(probleminstance.worksheets)};
 USED_ROADS = {print_useroads(probleminstance.worksheets)};
-ACTIVITY_CENTER = {print_activitycenter(probleminstance.worksheets)};
+%ACTIVITY_CENTER = {print_activitycenter(probleminstance.worksheets)};
+CENTER_ACTIVITIES = {print_centeractivities(probleminstance.worksheets, probleminstance.workcenters)};
 ROAD_ACTIVITIES = {print_road_activities(probleminstance)};
 """)
 # W_TO_A = {print_w2a(probleminstance.worksheets, probleminstance.number_of_activities)};

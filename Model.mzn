@@ -37,7 +37,8 @@ array[ROAD_SETS] of set of ROADS: ROAD_CLOSE;      %Set of roads which refer to 
 array[PRECEDE_SET, 1..2] of WORKSHEETS : PRECEDE;        %The first Workbook_ID has to be finished before the second 
 array[ACTIVITIES] of ROADS : USED_ROADS;
 array[ACTIVITIES] of int : WORKERS_NEEDED;
-array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
+%array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
+array[CENTERS] of set of ACTIVITIES: CENTER_ACTIVITIES;
 %array[WORKSHEETS, ACTIVITIES] of int : W_TO_A;
 array[WORKSHEETS] of set of ACTIVITIES: W_A;
 array[CENTERS] of int : MAX_CAPACITY;
@@ -78,6 +79,7 @@ constraint forall(w in WORKSHEETS, a in W_A[w])
 constraint forall(w in WORKSHEETS, a, b in W_A[w] where a+1 == b)
     (activity_start[a]+1 == activity_start[b]);
 
+
 % maximal number of blocked roads on a given day - only relevant in HARD instances
 constraint forall(rs in ROAD_SETS) (
   forall(d in DAYS)
@@ -99,7 +101,7 @@ constraint forall(w in WORKSHEETS) (
 %TODO: Use the cumulative constraint?!
 constraint forall(c in CENTERS) (
   forall(d in DAYS)
-    (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
+    (sum (a in CENTER_ACTIVITIES[c] where activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
 );
 
 var int : objective;

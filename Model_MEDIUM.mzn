@@ -37,7 +37,8 @@ array[ROAD_SETS] of set of ROADS: ROAD_CLOSE;      %Set of roads which refer to 
 array[PRECEDE_SET, 1..2] of WORKSHEETS : PRECEDE;        %The first Workbook_ID has to be finished before the second 
 array[ACTIVITIES] of ROADS : USED_ROADS;
 array[ACTIVITIES] of int : WORKERS_NEEDED;
-array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
+%array[ACTIVITIES] of CENTERS : ACTIVITY_CENTER;
+array[CENTERS] of set of ACTIVITIES: CENTER_ACTIVITIES;
 %array[WORKSHEETS, ACTIVITIES] of int : W_TO_A;
 array[WORKSHEETS] of set of ACTIVITIES: W_A;
 array[CENTERS] of int : MAX_CAPACITY;
@@ -103,7 +104,7 @@ constraint forall(w in WORKSHEETS) (
 %TODO: Use the cumulative constraint?!
 constraint forall(c in CENTERS) (
   forall(d in DAYS)
-    (sum (a in ACTIVITIES where ACTIVITY_CENTER[a]==c /\ activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
+    (sum (a in CENTER_ACTIVITIES[c] where activity_start[a] == d) (activity_used[a] * WORKERS_NEEDED[a]) <= MAX_CAPACITY[c])
 );
 
 var int : objective;
@@ -112,8 +113,8 @@ var int : second;
 
 constraint first = sum (w in WORKSHEETS) (IMPORTANCE[w]*used[w]);
 %constraint second = max (d in DAYS) (sum (r in ROADS) (sum(a in ACTIVITIES where USED_ROADS[a] == r) (PERTUBATION[r,d]*activity_used[a])));
-constraint second = max (d in DAYS) (sum (r in ROADS, a in ROAD_ACTIVITIES[r] where activity_used[a] /\ activity_start[a] == d) (PERTUBATION[r,d]));
-constraint objective =  first - second;
+%constraint second = max (d in DAYS) (sum (r in ROADS, a in ROAD_ACTIVITIES[r] where activity_used[a] /\ activity_start[a] == d) (PERTUBATION[r,d]));
+constraint objective =  first; %- second;
 
 solve maximize objective; 
 
